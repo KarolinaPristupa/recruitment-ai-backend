@@ -3,11 +3,8 @@ package com.example.server.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
-@Table(name = "roles")
+@Table(name = "role")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class Role {
@@ -18,8 +15,6 @@ public class Role {
     @Column(unique = true, nullable = false)
     private String name;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
-
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users = new HashSet<>();
 }
