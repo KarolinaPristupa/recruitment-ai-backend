@@ -1,5 +1,6 @@
 package com.example.server.model;
 
+import com.example.server.model.enums.EnterpriseStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,9 +26,11 @@ public class Enterprise {
     private String contactEmail;
     private String contactPhone;
 
-    @Column(columnDefinition = "varchar(20) default 'active'")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private EnterpriseStatus status = EnterpriseStatus.ACTIVE;
 
     private LocalDateTime updatedAt = LocalDateTime.now();
 }
+
 
