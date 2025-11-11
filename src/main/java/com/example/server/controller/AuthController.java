@@ -36,15 +36,14 @@ public class AuthController {
     @PostMapping("/hr/register")
     public ResponseEntity<?> registerHR(@RequestBody UserRegistrationDTO dto) {
         User user = userService.registerHR(dto);
-        String token = jwtUtil.generateToken(user.getLogin(), user.getRole().getName());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().getName());
 
         AuthResponseDTO response = new AuthResponseDTO();
         response.setToken(token);
-        response.setUsername(user.getLogin());
+        response.setUsername(user.getEmail());
         response.setRole(user.getRole().getName());
 
         return ResponseEntity.ok(response);
     }
-
 }
 

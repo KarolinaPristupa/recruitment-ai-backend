@@ -26,7 +26,6 @@ public class UserService {
 
     public User registerHR(UserRegistrationDTO dto) {
         User user = new User();
-        user.setLogin(dto.getLogin());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
