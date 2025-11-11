@@ -1,5 +1,6 @@
 package com.example.server.model;
 
+import com.example.server.model.enums.ActionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +24,9 @@ public class Log {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String action;
+    @Enumerated(EnumType.STRING)
+    private ActionType action;
+
     private LocalDateTime timestamp = LocalDateTime.now();
 
     @Column(columnDefinition = "TEXT")

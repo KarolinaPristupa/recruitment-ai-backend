@@ -9,6 +9,7 @@ import com.example.server.service.EnterpriseService;
 import com.example.server.service.UserService;
 import com.example.server.util.JwtUtil;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,8 +35,9 @@ public class AuthController {
     }
 
     @PostMapping("/hr/register")
-    public ResponseEntity<?> registerHR(@RequestBody UserRegistrationDTO dto) {
-        User user = userService.registerHR(dto);
+    public ResponseEntity<?> registerHR(@RequestBody UserRegistrationDTO dto, Authentication auth) {
+        User currentUser = userService.findByEmail(auth.getName());
+        User user = userService.registerHR(dto, currentUser);
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().getName());
 
         AuthResponseDTO response = new AuthResponseDTO();
