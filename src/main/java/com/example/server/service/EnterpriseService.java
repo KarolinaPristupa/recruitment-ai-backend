@@ -21,4 +21,9 @@ public class EnterpriseService {
         enterprise.setContactPhone(dto.getContactPhone());
         return enterpriseRepository.save(enterprise);
     }
+
+    public Enterprise findById(Long id) {
+        return enterpriseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Enterprise not found with id: " + id));
+    }
 }

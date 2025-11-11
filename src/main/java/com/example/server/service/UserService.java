@@ -58,6 +58,28 @@ public class UserService {
 
         return savedUser;
     }
+
+    public User registerEnterpriseAdmin(UserRegistrationDTO dto, Enterprise enterprise) {
+        User user = new User();
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+
+        user.setRole(roleRepository.findByName("ENT_ADMIN")
+                .orElseThrow(() -> new RuntimeException("Role ENT_ADMIN not found")));
+
+        user.setEnterprise(enterprise);
+
+        User savedUser = userRepository.save(user);
+
+        logService.log(savedUser, ActionType.CREATE_USER,
+                "Создан ENT_ADMIN: " + savedUser.getEmail() + ", Enterprise: " + enterprise.getName());
+
+        return savedUser;
+    }
+
 }
 
 
