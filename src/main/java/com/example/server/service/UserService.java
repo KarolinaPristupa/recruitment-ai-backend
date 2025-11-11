@@ -53,7 +53,8 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         logService.log(currentUser, ActionType.CREATE_USER,
-                "Создан HR: " + savedUser.getEmail() + ", Enterprise: " + enterprise.getName());
+                "Создан HR: " + savedUser.getEmail() +
+                        (savedUser.getEnterprise() != null ? ", Enterprise: " + savedUser.getEnterprise().getName() : ""));
 
         return savedUser;
     }

@@ -36,16 +36,22 @@ public class AuthController {
 
     @PostMapping("/hr/register")
     public ResponseEntity<?> registerHR(@RequestBody UserRegistrationDTO dto, Authentication auth) {
+        if (auth == null) {
+            return ResponseEntity.status(403).body("Forbidden: user not authenticated");
+        }
+
         User currentUser = userService.findByEmail(auth.getName());
-        User user = userService.registerHR(dto, currentUser);
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().getName());
+        User savedUser = userService.registerHR(dto, currentUser);
+
+        String token = jwtUtil.generateToken(savedUser.getEmail(), savedUser.getRole().getName());
 
         AuthResponseDTO response = new AuthResponseDTO();
         response.setToken(token);
-        response.setUsername(user.getEmail());
-        response.setRole(user.getRole().getName());
+        response.setUsername(savedUser.getEmail());
+        response.setRole(savedUser.getRole().getName());
 
         return ResponseEntity.ok(response);
     }
+
 }
 
