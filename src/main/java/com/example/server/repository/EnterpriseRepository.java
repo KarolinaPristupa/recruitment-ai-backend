@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface EnterpriseRepository extends JpaRepository<Enterprise, Long> {
     Optional<Enterprise> findByName(String name);
+    boolean existsByContactEmail(String contactEmail);
+    boolean existsByContactPhone(String contactPhone);
 }

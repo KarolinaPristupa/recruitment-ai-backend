@@ -2,10 +2,15 @@ package com.example.server.model.enums;
 
 public enum ActionType {
     LOGIN,              // вход в систему
-    LOGOUT,             // выход из системы
-    CREATE_USER,        // создание нового пользователя (HR или кандидат)
-    UPDATE_USER,        // редактирование пользователя
-    DELETE_USER,        // удаление пользователя
+    CREATE_ENTERPRISE,        // создание нового предприятия
+    UPDATE_ENTERPRISE,        // редактирование предприятия
+    DELETE_ENTERPRISE,     // удаление предприятия
+    CREATE_ADMIN,        // создание нового администратора
+    UPDATE_ADMIN,        // редактирование администратора
+    DELETE_ADMIN,       // удаление администратора
+    CREATE_HR,        // создание нового HR-а
+    UPDATE_HR,        // редактирование HR-а
+    DELETE_HR,       // удаление HR-а
     CREATE_VACANCY,     // создание вакансии
     UPDATE_VACANCY,     // редактирование вакансии
     DELETE_VACANCY,     // удаление вакансии

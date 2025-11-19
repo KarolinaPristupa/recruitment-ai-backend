@@ -1,5 +1,6 @@
 package com.example.server.service;
 
+import com.example.server.dto.EnterpriseWithAdminRegistrationDTO;
 import com.example.server.dto.UserRegistrationDTO;
 import com.example.server.model.Enterprise;
 import com.example.server.model.User;
@@ -14,17 +15,17 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    EnterpriseRepository enterpriseRepository;
     private final RoleRepository roleRepository;
-    private final EnterpriseRepository enterpriseRepository;
     private final PasswordEncoder passwordEncoder;
     private final LogService logService;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository,
-                       EnterpriseRepository enterpriseRepository, PasswordEncoder passwordEncoder,
+    public UserService(UserRepository userRepository,
+                       RoleRepository roleRepository,
+                       PasswordEncoder passwordEncoder,
                        LogService logService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.enterpriseRepository = enterpriseRepository;
         this.passwordEncoder = passwordEncoder;
         this.logService = logService;
     }
@@ -35,51 +36,50 @@ public class UserService {
     }
 
     public User registerHR(UserRegistrationDTO dto, User currentUser) {
-        User user = new User();
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
-        user.setFirstName(dto.getFirstName());
-        user.setLastName(dto.getLastName());
-        user.setEmail(dto.getEmail());
-        user.setPhone(dto.getPhone());
-
-        user.setRole(roleRepository.findByName("HR")
-                .orElseThrow(() -> new RuntimeException("Role HR not found")));
-
         Enterprise enterprise = enterpriseRepository.findById(dto.getEnterpriseId())
                 .orElseThrow(() -> new RuntimeException("Enterprise not found"));
 
-        user.setEnterprise(enterprise);
-
+        User user = createUser(dto, "HR", enterprise);
         User savedUser = userRepository.save(user);
 
-        logService.log(currentUser, ActionType.CREATE_USER,
-                "Создан HR: " + savedUser.getEmail() +
-                        (savedUser.getEnterprise() != null ? ", Enterprise: " + savedUser.getEnterprise().getName() : ""));
+        logService.log(currentUser, ActionType.CREATE_HR,
+                "Создан HR: " + savedUser.getEmail() + ", Enterprise: " + enterprise.getName());
 
         return savedUser;
     }
 
-    public User registerEnterpriseAdmin(UserRegistrationDTO dto, Enterprise enterprise) {
+    User createEnterpriseAdmin(EnterpriseWithAdminRegistrationDTO dto, Enterprise enterprise) {
+        User admin = new User();
+        admin.setFirstName(dto.getFirstName());
+        admin.setLastName(dto.getLastName());
+        admin.setEmail(dto.getEmail());
+        admin.setPhone(dto.getPhone());
+        admin.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        admin.setEnterprise(enterprise);
+        admin.setRole(roleRepository.findByName("ENT_ADMIN")
+                .orElseThrow(() -> new RuntimeException("Role ENT_ADMIN not found")));
+
+        User savedAdmin = userRepository.save(admin);
+
+        logService.log(savedAdmin, ActionType.CREATE_ENTERPRISE,
+                "Создана компания: " + enterprise.getName());
+
+        logService.log(savedAdmin, ActionType.CREATE_ADMIN,
+                "Создан администратор компании: " + savedAdmin.getEmail() +
+                        " (компания: " + enterprise.getName() + ")");
+        return savedAdmin;
+    }
+
+    private User createUser(UserRegistrationDTO dto, String roleName, Enterprise enterprise) {
         User user = new User();
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
-
-        user.setRole(roleRepository.findByName("ENT_ADMIN")
-                .orElseThrow(() -> new RuntimeException("Role ENT_ADMIN not found")));
-
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setEnterprise(enterprise);
-
-        User savedUser = userRepository.save(user);
-
-        logService.log(savedUser, ActionType.CREATE_USER,
-                "Создан ENT_ADMIN: " + savedUser.getEmail() + ", Enterprise: " + enterprise.getName());
-
-        return savedUser;
+        user.setRole(roleRepository.findByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role " + roleName + " not found")));
+        return user;
     }
-
 }
-
-

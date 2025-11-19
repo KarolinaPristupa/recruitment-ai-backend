@@ -1,9 +1,8 @@
 package com.example.server.controller;
 
 import com.example.server.dto.AuthResponseDTO;
-import com.example.server.dto.EnterpriseRegistrationDTO;
+import com.example.server.dto.EnterpriseWithAdminRegistrationDTO;
 import com.example.server.dto.UserRegistrationDTO;
-import com.example.server.model.Enterprise;
 import com.example.server.model.User;
 import com.example.server.service.EnterpriseService;
 import com.example.server.service.UserService;
@@ -28,12 +27,6 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
-    @PostMapping("/enterprise/register")
-    public ResponseEntity<?> registerEnterprise(@RequestBody EnterpriseRegistrationDTO dto) {
-        Enterprise enterprise = enterpriseService.register(dto);
-        return ResponseEntity.ok(enterprise);
-    }
-
     @PostMapping("/hr/register")
     public ResponseEntity<?> registerHR(@RequestBody UserRegistrationDTO dto, Authentication auth) {
         if (auth == null) {
@@ -53,23 +46,20 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/enterprise/admin/register")
-    public ResponseEntity<?> registerEnterpriseAdmin(
-            @RequestBody UserRegistrationDTO dto) {
+    @PostMapping("/enterprise/register")
+    public ResponseEntity<AuthResponseDTO> registerEnterpriseWithAdmin(
+            @RequestBody EnterpriseWithAdminRegistrationDTO dto) {
 
-        Enterprise enterprise = enterpriseService.findById(dto.getEnterpriseId());
+        User admin = enterpriseService.registerEnterpriseWithAdmin(dto);
 
-        User admin = userService.registerEnterpriseAdmin(dto, enterprise);
-
-        String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole().getName());
+        String token = jwtUtil.generateToken(admin.getEmail(), "ENT_ADMIN");
 
         AuthResponseDTO response = new AuthResponseDTO();
         response.setToken(token);
         response.setUsername(admin.getEmail());
-        response.setRole(admin.getRole().getName());
+        response.setRole("ENT_ADMIN");
 
         return ResponseEntity.ok(response);
     }
-
 }
 
