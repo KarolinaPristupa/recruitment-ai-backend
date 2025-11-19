@@ -15,16 +15,17 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-    EnterpriseRepository enterpriseRepository;
+    private final EnterpriseRepository enterpriseRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final LogService logService;
 
     public UserService(UserRepository userRepository,
-                       RoleRepository roleRepository,
+                       EnterpriseRepository enterpriseRepository, RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
                        LogService logService) {
         this.userRepository = userRepository;
+        this.enterpriseRepository = enterpriseRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.logService = logService;
@@ -82,4 +83,24 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Role " + roleName + " not found")));
         return user;
     }
+
+    public User authenticate(String email, String rawPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Enterprise enterprise = enterpriseRepository.findById(
+                user.getEnterprise().getId()
+        ).orElseThrow(() -> new RuntimeException("Enterprise not found"));
+
+        if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        logService.log(user, ActionType.LOGIN,
+                "Выполнен вход: " + user.getEmail() +
+                        " (компания: " + enterprise.getName() + ")");
+
+        return user;
+    }
+
 }

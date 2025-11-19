@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/hr/register").hasAuthority("ENT_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/auth/enterprise/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/enterprise/admin/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/user/login").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), AnonymousAuthenticationFilter.class);
