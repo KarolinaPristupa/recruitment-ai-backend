@@ -1,8 +1,8 @@
 package com.example.server.controller;
 
-import com.example.server.dto.AuthResponseDTO;
-import com.example.server.dto.EnterpriseWithAdminRegistrationDTO;
-import com.example.server.dto.UserRegistrationDTO;
+import com.example.server.dto.response.AuthResponseDTO;
+import com.example.server.dto.request.EnterpriseWithAdminRegistrationDTO;
+import com.example.server.dto.request.UserRegistrationDTO;
 import com.example.server.model.User;
 import com.example.server.service.EnterpriseService;
 import com.example.server.service.UserService;

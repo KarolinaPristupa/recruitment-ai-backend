@@ -1,7 +1,7 @@
 package com.example.server.service;
 
-import com.example.server.dto.EnterpriseWithAdminRegistrationDTO;
-import com.example.server.dto.UserRegistrationDTO;
+import com.example.server.dto.request.EnterpriseWithAdminRegistrationDTO;
+import com.example.server.dto.request.UserRegistrationDTO;
 import com.example.server.model.Enterprise;
 import com.example.server.model.User;
 import com.example.server.model.enums.ActionType;

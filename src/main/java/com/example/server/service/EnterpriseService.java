@@ -1,6 +1,8 @@
 package com.example.server.service;
 
-import com.example.server.dto.EnterpriseWithAdminRegistrationDTO;
+import com.example.server.dto.request.EnterpriseWithAdminRegistrationDTO;
+import com.example.server.exception.EnterpriseEmailExistsException;
+import com.example.server.exception.EnterprisePhoneExistsException;
 import com.example.server.model.Enterprise;
 import com.example.server.model.User;
 import com.example.server.repository.EnterpriseRepository;
@@ -26,18 +28,12 @@ public class EnterpriseService {
         String contactPhone = dto.getContactPhone();
 
         if (enterpriseRepository.existsByContactEmail(contactEmail)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Email компании уже зарегистрирован: " + contactEmail
-            );
+            throw new EnterpriseEmailExistsException(contactEmail);
         }
 
         if (contactPhone != null && !contactPhone.isBlank()
                 && enterpriseRepository.existsByContactPhone(contactPhone)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Телефон компании уже зарегистрирован: " + contactPhone
-            );
+            throw new EnterprisePhoneExistsException(contactPhone);
         }
         Enterprise enterprise = new Enterprise();
         enterprise.setName(dto.getName());
