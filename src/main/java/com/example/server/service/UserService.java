@@ -8,6 +8,9 @@ import com.example.server.model.enums.ActionType;
 import com.example.server.repository.EnterpriseRepository;
 import com.example.server.repository.RoleRepository;
 import com.example.server.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -102,5 +105,24 @@ public class UserService {
 
         return user;
     }
+
+    public User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        if (auth.getPrincipal() instanceof User user) {
+            return user;
+        }
+
+        if (auth.getPrincipal() instanceof UserDetails userDetails) {
+            return userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
+
+        throw new RuntimeException("Invalid authentication principal");
+    }
+
 
 }

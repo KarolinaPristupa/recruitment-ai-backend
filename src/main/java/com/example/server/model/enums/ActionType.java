@@ -11,6 +11,7 @@ public enum ActionType {
     CREATE_HR,        // создание нового HR-а
     UPDATE_HR,        // редактирование HR-а
     DELETE_HR,       // удаление HR-а
+    READ_VACANCY,   // выведены вакансии
     CREATE_VACANCY,     // создание вакансии
     UPDATE_VACANCY,     // редактирование вакансии
     DELETE_VACANCY,     // удаление вакансии
