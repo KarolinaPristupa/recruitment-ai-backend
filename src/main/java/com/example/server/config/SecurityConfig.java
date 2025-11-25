@@ -13,8 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,15 +44,24 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        // CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(HttpMethod.POST, "/api/auth/hr/register").hasAuthority("ENT_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/auth/enterprise/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/enterprise/admin/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/user/login").permitAll()
-                        .requestMatchers("/api/hh/**").permitAll()
+
+                        .requestMatchers("/api/hh/oauth/callback").permitAll()
+
                         .requestMatchers("/mock-hh/**").permitAll()
+
+                        .requestMatchers("/api/hh/oauth/check-token").authenticated()
+                        .requestMatchers("/api/hh/oauth/login-url").authenticated()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), AnonymousAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -66,6 +74,7 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("Authorization","Content-Type","Accept"));
         config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

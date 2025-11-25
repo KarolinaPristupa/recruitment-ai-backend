@@ -16,7 +16,6 @@ public class HhVacancyMockController {
         HhVacancyCreateResponse r = new HhVacancyCreateResponse();
         r.setId("mock-12345");
         r.setUrl("http://mock-hh/vacancies/mock-12345");
-        r.setStatus("draft");
         return r;
     }
 }

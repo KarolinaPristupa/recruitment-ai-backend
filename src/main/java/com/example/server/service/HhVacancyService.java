@@ -11,13 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class HhVacancyService {
 
-    private final VacancyRepository vacancyRepo;
-    private final ExternalVacancyRepository externalRepo;
-    private final HhClient hhClient;
+    private final VacancyRepository vacancyRepository;
+    private final ExternalVacancyRepository externalVacancyRepository;
+    private final HhClient client;
+    private final UserService userService;
     private final HhAuthService authService;
 
     private HhVacancyCreateRequest toHhRequest(Vacancy v) {
@@ -26,48 +27,43 @@ public class HhVacancyService {
         req.setDescription(v.getDescription() + "\n\n" + v.getRequirements());
         req.setArea(1);
 
-        HhVacancyCreateRequest.Salary sal = new HhVacancyCreateRequest.Salary();
-        sal.setFrom(v.getSalaryMin().intValue());
-        sal.setTo(v.getSalaryMax().intValue());
-        req.setSalary(sal);
+        if (v.getSalaryMin() != null && v.getSalaryMax() != null) {
+            var sal = new HhVacancyCreateRequest.Salary();
+            sal.setFrom(v.getSalaryMin().intValue());
+            sal.setTo(v.getSalaryMax().intValue());
+            req.setSalary(sal);
+        }
 
         return req;
     }
 
-    public ExternalVacancy publishToHh(Long vacancyId, String code) {
-        log.info(">>> Публикация вакансии в HH: vacancyId={}, code={}", vacancyId, code);
+    public ExternalVacancy publishToHh(Long vacancyId) {
+        var hr = userService.getCurrentUser();
 
-        Vacancy vacancy = vacancyRepo.findById(vacancyId)
-                .orElseThrow(() -> {
-                    log.error("Вакансия не найдена: id={}", vacancyId);
-                    return new RuntimeException("Vacancy not found");
-                });
+        if (!authService.hasTokenForHr(hr.getId())) {
+            throw new RuntimeException("HH token missing");
+        }
 
-        log.info("Вакансия найдена: title={}", vacancy.getTitle());
+        var token = authService.getTokenForHr(hr);
 
-        var token = authService.exchangeCodeForToken(code);
-        log.info("Получен токен от HH: access={}", token.getAccess_token());
+        var vacancy = vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new RuntimeException("Vacancy not found"));
 
         var request = toHhRequest(vacancy);
-        log.info("Сформирован запрос в HH: {}", request);
 
-        var response = hhClient.createVacancy(request, token.getAccess_token());
-        log.info("Ответ HH: id={}, status={}, url={}",
-                response.getId(), response.getStatus(), response.getUrl());
+        log.info("Публикую вакансию {} в HH", vacancyId);
+        var response = client.publish(request, token.getAccessToken());
+        log.info("HH ответил {}", response);
 
         ExternalVacancy ext = ExternalVacancy.builder()
                 .vacancy(vacancy)
                 .externalId(response.getId())
                 .externalUrl(response.getUrl())
-                .externalStatus(response.getStatus())
+                .externalStatus("ACTIVE")
                 .build();
 
-        log.info("Сохранение ExternalVacancy: {}", ext);
-
-        var saved = externalRepo.save(ext);
-        log.info(">>> Публикация завершена, сохранено: {}", saved);
-
-        return saved;
+        return externalVacancyRepository.save(ext);
     }
 
 }
+

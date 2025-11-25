@@ -8,6 +8,7 @@ import com.example.server.model.enums.ActionType;
 import com.example.server.repository.EnterpriseRepository;
 import com.example.server.repository.RoleRepository;
 import com.example.server.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -122,6 +123,11 @@ public class UserService {
         }
 
         throw new RuntimeException("Invalid authentication principal");
+    }
+
+    public User getById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("HR not found"));
     }
 
 

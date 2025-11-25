@@ -28,7 +28,6 @@ public class VacancyService {
 
     public VacancyResponseDTO createVacancy(VacancyRequestDTO dto) {
         User currentUser = userService.getCurrentUser();
-
         checkIsHR(currentUser);
 
         Vacancy vacancy = Vacancy.builder()
@@ -40,8 +39,9 @@ public class VacancyService {
                 .salaryMax(dto.getSalaryMax())
                 .status(dto.getStatus())
                 .externalIds(dto.getExternalIds())
-                .publishedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
+
+                .publishedAt("ACTIVE".equals(dto.getStatus()) ? LocalDateTime.now() : null)
                 .build();
 
         vacancyRepository.save(vacancy);
@@ -50,7 +50,8 @@ public class VacancyService {
                 currentUser,
                 ActionType.CREATE_VACANCY,
                 "Создана вакансия: " + vacancy.getTitle() +
-                        " (ID: " + vacancy.getId() + ")"
+                        " (ID: " + vacancy.getId() + ")" +
+                        ("ACTIVE".equals(vacancy.getStatus()) ? " — опубликована" : " — черновик")
         );
 
         return toResponse(vacancy);
@@ -74,12 +75,6 @@ public class VacancyService {
     public List<VacancyResponseDTO> getAllVacancies() {
         User currentUser = userService.getCurrentUser();
 
-        logService.log(
-                currentUser,
-                ActionType.READ_VACANCY,
-                "Просмотр списка всех вакансий"
-        );
-
         return vacancyRepository.findAll()
                 .stream()
                 .map(this::toResponse)
@@ -92,11 +87,6 @@ public class VacancyService {
 
         checkIsHR(currentUser);
 
-        logService.log(
-                currentUser,
-                ActionType.READ_VACANCY,
-                "Просмотр списка своих вакансий"
-        );
 
         return vacancyRepository.findByUserId(currentUser.getId())
                 .stream()

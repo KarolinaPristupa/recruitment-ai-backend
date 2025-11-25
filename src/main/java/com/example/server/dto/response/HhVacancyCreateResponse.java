@@ -6,6 +6,5 @@ import lombok.Data;
 public class HhVacancyCreateResponse {
     private String id;
     private String url;
-    private String status;
 }
 

@@ -16,6 +16,10 @@ public enum ActionType {
     UPDATE_VACANCY,     // редактирование вакансии
     DELETE_VACANCY,     // удаление вакансии
     VIEW_VACANCY,       // просмотр вакансии
+    HH_LOGIN,            // вход на HH (через OAuth)
+    HH_TOKEN_SAVED,      // сохранение токена HH
+    HH_TOKEN_REFRESHED,  // обновление токена HH
+    HH_LOGOUT,          // выход/отзыв токена HH
     OTHER               // любое действие, которое не входит в список
 }
 

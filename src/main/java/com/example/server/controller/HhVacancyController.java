@@ -1,9 +1,12 @@
 package com.example.server.controller;
 
 import com.example.server.model.ExternalVacancy;
+import com.example.server.service.HhAuthService;
 import com.example.server.service.HhVacancyService;
+import com.example.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -13,14 +16,26 @@ import org.springframework.web.bind.annotation.*;
 public class HhVacancyController {
 
     private final HhVacancyService hhVacancyService;
+    private final UserService userService;
+    private final HhAuthService hhAuthService;
 
     @PostMapping("/{id}/publish")
-    public ExternalVacancy publish(@PathVariable Long id, @RequestParam String code) {
-        log.info("POST /api/hh/vacancies/{}/publish?code={}", id, code);
-        var result = hhVacancyService.publishToHh(id, code);
-        log.info("Ответ клиенту: {}", result);
-        return result;
+    public ResponseEntity<?> publish(@PathVariable Long id) {
+        var hr = userService.getCurrentUser();
+
+        if (!hhAuthService.hasTokenForHr(hr.getId())) {
+            String loginUrl = hhAuthService.getLoginUrl(hr.getId());
+            return ResponseEntity.status(401).body(loginUrl);
+        }
+
+        try {
+            ExternalVacancy extVacancy = hhVacancyService.publishToHh(id);
+            return ResponseEntity.ok(extVacancy);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
+
 }
 
 
