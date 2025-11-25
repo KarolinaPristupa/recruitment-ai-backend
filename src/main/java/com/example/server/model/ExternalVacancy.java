@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "external_vacancies")
 @Data
@@ -24,12 +26,13 @@ public class ExternalVacancy {
     @JsonIgnore
     private Vacancy vacancy;
 
-    @Column(length = 255)
-    private String externalUrl;
-
-    @Column(length = 50)
-    private String externalStatus;
-
-    @Column(length = 50)
     private String externalId;
+    private String externalUrl;
+    private String externalStatus;
+    private String billingType;
+    private String vacancyType;
+    private Boolean archived;
+
+    private LocalDateTime publishedAt;
 }
+

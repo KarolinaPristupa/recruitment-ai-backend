@@ -1,10 +1,12 @@
 package com.example.server.model;
+
+import com.example.server.model.enums.EmploymentType;
+import com.example.server.model.enums.Platform;
+import com.example.server.model.enums.VacancyStatus;
+import com.example.server.model.enums.WorkFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -35,15 +37,40 @@ public class Vacancy {
     @Column(columnDefinition = "TEXT")
     private String requirements;
 
+    @Column(columnDefinition = "TEXT")
+    private String skills;
+
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
 
-    @Column(length = 20)
-    private String status;
+    @Column(length = 3)
+    private String currency;
+
+    @Enumerated(EnumType.STRING)
+    private EmploymentType employmentType;
+
+    @Enumerated(EnumType.STRING)
+    private WorkFormat workFormat;
+
+    @Column(length = 50)
+    private String experience;
+
+    @Column(length = 50)
+    private String schedule;
+
+    @Column(length = 50)
+    private String category;
+
+    @Enumerated(EnumType.STRING)
+    private Platform platform;
+
+    @Enumerated(EnumType.STRING)
+    private VacancyStatus status;
 
     private LocalDateTime publishedAt;
-    private String externalIds;
-
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
+    private String externalId;
 }
+

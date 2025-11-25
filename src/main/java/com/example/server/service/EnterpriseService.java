@@ -6,10 +6,8 @@ import com.example.server.exception.EnterprisePhoneExistsException;
 import com.example.server.model.Enterprise;
 import com.example.server.model.User;
 import com.example.server.repository.EnterpriseRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class EnterpriseService {
@@ -49,5 +47,20 @@ public class EnterpriseService {
     public Enterprise findById(Long id) {
         return enterpriseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Enterprise not found with id: " + id));
+    }
+
+    public Enterprise getByUserId(Long userId) {
+        User user = userService.getById(userId);
+        Enterprise enterprise = enterpriseRepository.findById(user.getEnterprise().getId())
+                .orElseThrow(() -> new RuntimeException("Enterprise not found for user id: " + userId));
+        return enterprise;
+    }
+
+    public boolean existsByEmail(String email) {
+        return enterpriseRepository.existsByContactEmail(email);
+    }
+
+    public boolean existsByPhone(String phone) {
+        return enterpriseRepository.existsByContactPhone(phone);
     }
 }

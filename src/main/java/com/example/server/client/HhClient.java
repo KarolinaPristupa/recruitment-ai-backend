@@ -1,6 +1,7 @@
 package com.example.server.client;
 
 import com.example.server.dto.request.HhVacancyCreateRequest;
+import com.example.server.dto.response.HhAreaResponse;
 import com.example.server.dto.response.HhAuthTokenResponse;
 import com.example.server.dto.response.HhVacancyCreateResponse;
 import lombok.RequiredArgsConstructor;
@@ -54,5 +55,34 @@ public class HhClient {
                 HhVacancyCreateResponse.class
         );
     }
+
+    public Integer findAreaId(String country, String city) {
+        try {
+            String url = "https://api.hh.ru/areas";
+
+            ResponseEntity<HhAreaResponse[]> response = restTemplate.getForEntity(
+                    url,
+                    HhAreaResponse[].class
+            );
+
+            if (response.getBody() == null) {
+                return null;
+            }
+
+            for (HhAreaResponse area : response.getBody()) {
+                Integer id = area.find(city, country);
+                if (id != null) {
+                    return id;
+                }
+            }
+
+            return null;
+
+        } catch (Exception e) {
+            System.err.println("Ошибка запроса HH areas: " + e.getMessage());
+            return null;
+        }
+    }
+
 
 }
