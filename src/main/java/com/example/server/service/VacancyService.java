@@ -5,6 +5,8 @@ import com.example.server.dto.response.VacancyResponseDTO;
 import com.example.server.model.User;
 import com.example.server.model.Vacancy;
 import com.example.server.model.enums.ActionType;
+import com.example.server.model.enums.ExperienceType;
+import com.example.server.model.enums.ScheduleType;
 import com.example.server.model.enums.VacancyStatus;
 import com.example.server.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +36,6 @@ public class VacancyService {
         checkIsHR(currentUser);
 
         var enterprise = enterpriseService.getByUserId(currentUser.getId());
-        String city = hhAreaService.extractCity(enterprise.getAddress());
-        String country = hhAreaService.extractCountry(enterprise.getAddress());
-        var platform = hhAreaService.getPlatformByCountry(country);
 
         Vacancy vacancy = Vacancy.builder()
                 .user(currentUser)
@@ -49,10 +48,9 @@ public class VacancyService {
                 .currency(dto.getCurrency())
                 .employmentType(dto.getEmploymentType())
                 .workFormat(dto.getWorkFormat())
-                .experience(dto.getExperience())
-                .schedule(dto.getSchedule())
+                .experience(ExperienceType.fromDto(dto.getExperience()))
+                .schedule(ScheduleType.fromDto(dto.getSchedule()))
                 .category(dto.getCategory())
-                .platform(platform)
                 .status(dto.getStatus() != null ? dto.getStatus() : VacancyStatus.DRAFT)
                 .createdAt(LocalDateTime.now())
                 .publishedAt(VacancyStatus.ACTIVE.equals(dto.getStatus()) ? LocalDateTime.now() : null)
@@ -75,9 +73,6 @@ public class VacancyService {
                 .orElseThrow(() -> new RuntimeException("Vacancy not found"));
 
         var enterprise = enterpriseService.getByUserId(currentUser.getId());
-        String city = hhAreaService.extractCity(enterprise.getAddress());
-        String country = hhAreaService.extractCountry(enterprise.getAddress());
-        var platform = hhAreaService.getPlatformByCountry(country);
 
         vacancy.setTitle(dto.getTitle());
         vacancy.setDescription(dto.getDescription());
@@ -88,10 +83,9 @@ public class VacancyService {
         vacancy.setCurrency(dto.getCurrency());
         vacancy.setEmploymentType(dto.getEmploymentType());
         vacancy.setWorkFormat(dto.getWorkFormat());
-        vacancy.setExperience(dto.getExperience());
-        vacancy.setSchedule(dto.getSchedule());
+        vacancy.setExperience(ExperienceType.fromDto(dto.getExperience()));
+        vacancy.setSchedule(ScheduleType.fromDto(dto.getSchedule()));
         vacancy.setCategory(dto.getCategory());
-        vacancy.setPlatform(platform);
         vacancy.setStatus(dto.getStatus());
         vacancy.setUpdatedAt(LocalDateTime.now());
 
@@ -156,7 +150,6 @@ public class VacancyService {
         var enterprise = enterpriseService.getByUserId(v.getUser().getId());
         String city = hhAreaService.extractCity(enterprise.getAddress());
         String country = hhAreaService.extractCountry(enterprise.getAddress());
-        var platform = hhAreaService.getPlatformByCountry(country);
 
         return VacancyResponseDTO.builder()
                 .id(v.getId())
@@ -176,7 +169,6 @@ public class VacancyService {
                 .workFormat(v.getWorkFormat())
                 .experience(v.getExperience())
                 .schedule(v.getSchedule())
-                .platform(platform)
                 .status(v.getStatus())
                 .publishedAt(VacancyStatus.ACTIVE.equals(v.getStatus()) ? v.getPublishedAt() : null)
                 .externalId(VacancyStatus.ACTIVE.equals(v.getStatus()) ? v.getExternalId() : null)

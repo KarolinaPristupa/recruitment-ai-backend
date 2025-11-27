@@ -3,8 +3,11 @@ package com.example.server.client;
 import com.example.server.dto.request.HhVacancyCreateRequest;
 import com.example.server.dto.response.HhAreaResponse;
 import com.example.server.dto.response.HhAuthTokenResponse;
+import com.example.server.dto.response.HhProfessionalRolesResponse;
 import com.example.server.dto.response.HhVacancyCreateResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -13,6 +16,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class HhClient {
 
@@ -41,6 +45,9 @@ public class HhClient {
         );
     }
 
+    public ResponseEntity<HhAreaResponse[]> getAreas() {
+        return restTemplate.getForEntity(baseUrl + "/areas", HhAreaResponse[].class);
+    }
 
     public HhVacancyCreateResponse publish(HhVacancyCreateRequest req, String accessToken) {
         HttpHeaders headers = new HttpHeaders();
@@ -50,39 +57,17 @@ public class HhClient {
         HttpEntity<?> entity = new HttpEntity<>(req, headers);
 
         return restTemplate.postForObject(
-                baseUrl + "/vacancies",
+                baseUrl + "/vacancies/drafts",
                 entity,
                 HhVacancyCreateResponse.class
         );
     }
 
-    public Integer findAreaId(String country, String city) {
-        try {
-            String url = "https://api.hh.ru/areas";
-
-            ResponseEntity<HhAreaResponse[]> response = restTemplate.getForEntity(
-                    url,
-                    HhAreaResponse[].class
-            );
-
-            if (response.getBody() == null) {
-                return null;
-            }
-
-            for (HhAreaResponse area : response.getBody()) {
-                Integer id = area.find(city, country);
-                if (id != null) {
-                    return id;
-                }
-            }
-
-            return null;
-
-        } catch (Exception e) {
-            System.err.println("Ошибка запроса HH areas: " + e.getMessage());
-            return null;
-        }
+    public HhProfessionalRolesResponse getProfessionalRoles() {
+        return restTemplate.getForObject(
+                baseUrl + "/professional_roles",
+                HhProfessionalRolesResponse.class
+        );
     }
-
 
 }

@@ -1,9 +1,6 @@
 package com.example.server.dto.response;
 
-import com.example.server.model.enums.EmploymentType;
-import com.example.server.model.enums.Platform;
-import com.example.server.model.enums.VacancyStatus;
-import com.example.server.model.enums.WorkFormat;
+import com.example.server.model.enums.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
@@ -34,10 +31,9 @@ public class VacancyResponseDTO {
 
     private EmploymentType employmentType;
     private WorkFormat workFormat;
-    private String experience;
-    private String schedule;
+    private ExperienceType experience;
+    private ScheduleType schedule;
 
-    private Platform platform;
     private VacancyStatus status;
     private LocalDateTime publishedAt;
     private String externalId;

@@ -1,9 +1,6 @@
 package com.example.server.model;
 
-import com.example.server.model.enums.EmploymentType;
-import com.example.server.model.enums.Platform;
-import com.example.server.model.enums.VacancyStatus;
-import com.example.server.model.enums.WorkFormat;
+import com.example.server.model.enums.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,17 +49,16 @@ public class Vacancy {
     @Enumerated(EnumType.STRING)
     private WorkFormat workFormat;
 
-    @Column(length = 50)
-    private String experience;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "experience")
+    private ExperienceType experience;
 
-    @Column(length = 50)
-    private String schedule;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "schedule")
+    private ScheduleType schedule;
 
     @Column(length = 50)
     private String category;
-
-    @Enumerated(EnumType.STRING)
-    private Platform platform;
 
     @Enumerated(EnumType.STRING)
     private VacancyStatus status;

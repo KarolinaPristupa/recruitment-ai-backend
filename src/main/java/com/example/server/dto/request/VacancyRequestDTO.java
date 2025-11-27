@@ -1,8 +1,8 @@
 package com.example.server.dto.request;
 
-import com.example.server.model.enums.EmploymentType;
-import com.example.server.model.enums.VacancyStatus;
-import com.example.server.model.enums.WorkFormat;
+import com.example.server.model.enums.*;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 
 import java.math.BigDecimal;

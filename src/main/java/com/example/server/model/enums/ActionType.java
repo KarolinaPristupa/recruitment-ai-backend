@@ -20,6 +20,7 @@ public enum ActionType {
     HH_TOKEN_SAVED,      // сохранение токена HH
     HH_TOKEN_REFRESHED,  // обновление токена HH
     HH_LOGOUT,          // выход/отзыв токена HH
+    HH_VACANCY_PUBLISHED, // вакансия была опубликована
     OTHER               // любое действие, которое не входит в список
 }
 
