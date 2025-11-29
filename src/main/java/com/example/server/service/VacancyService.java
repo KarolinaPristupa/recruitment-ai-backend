@@ -35,8 +35,6 @@ public class VacancyService {
         User currentUser = userService.getCurrentUser();
         checkIsHR(currentUser);
 
-        var enterprise = enterpriseService.getByUserId(currentUser.getId());
-
         Vacancy vacancy = Vacancy.builder()
                 .user(currentUser)
                 .title(dto.getTitle())
@@ -147,10 +145,6 @@ public class VacancyService {
     }
 
     private VacancyResponseDTO toResponse(Vacancy v) {
-        var enterprise = enterpriseService.getByUserId(v.getUser().getId());
-        String city = hhAreaService.extractCity(enterprise.getAddress());
-        String country = hhAreaService.extractCountry(enterprise.getAddress());
-
         return VacancyResponseDTO.builder()
                 .id(v.getId())
                 .userId(v.getUser().getId())
@@ -162,13 +156,11 @@ public class VacancyService {
                 .salaryMin(v.getSalaryMin())
                 .salaryMax(v.getSalaryMax())
                 .currency(v.getCurrency())
-                .city(city)
-                .country(country)
-                .hhAreaId(hhAreaService.getAreaId(country, city))
                 .employmentType(v.getEmploymentType())
                 .workFormat(v.getWorkFormat())
                 .experience(v.getExperience())
                 .schedule(v.getSchedule())
+                .category(v.getCategory())
                 .status(v.getStatus())
                 .publishedAt(VacancyStatus.ACTIVE.equals(v.getStatus()) ? v.getPublishedAt() : null)
                 .externalId(VacancyStatus.ACTIVE.equals(v.getStatus()) ? v.getExternalId() : null)

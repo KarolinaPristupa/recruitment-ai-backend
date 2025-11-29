@@ -33,7 +33,7 @@ public class VacancyResponseDTO {
     private WorkFormat workFormat;
     private ExperienceType experience;
     private ScheduleType schedule;
-
+    private String category;
     private VacancyStatus status;
     private LocalDateTime publishedAt;
     private String externalId;
