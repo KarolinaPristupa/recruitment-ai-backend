@@ -3,6 +3,7 @@ package com.example.server.controller;
 import com.example.server.dto.request.VacancyRequestDTO;
 import com.example.server.dto.response.VacancyResponseDTO;
 import com.example.server.service.VacancyService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class VacancyController {
     private final VacancyService vacancyService;
 
     @PostMapping
-    public ResponseEntity<VacancyResponseDTO> create(@RequestBody VacancyRequestDTO dto) {
+    public ResponseEntity<VacancyResponseDTO> create(@RequestBody VacancyRequestDTO dto) throws JsonProcessingException {
         return ResponseEntity.ok(vacancyService.createVacancy(dto));
     }
 
@@ -36,11 +37,16 @@ public class VacancyController {
         return ResponseEntity.ok(vacancyService.getMyVacancies());
     }
 
+    @GetMapping("/my/active")
+    public ResponseEntity<List<VacancyResponseDTO>> getMyActiveVacancies() {
+        return ResponseEntity.ok(vacancyService.getMyActiveVacancies());
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<VacancyResponseDTO> update(
             @PathVariable Long id,
             @RequestBody VacancyRequestDTO dto
-    ) {
+    ) throws JsonProcessingException {
         return ResponseEntity.ok(vacancyService.updateVacancy(id, dto));
     }
 

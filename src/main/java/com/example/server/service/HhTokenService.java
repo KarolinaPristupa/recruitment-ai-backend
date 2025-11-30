@@ -16,19 +16,6 @@ public class HhTokenService {
     private final HhTokenRepository repo;
     private final UserService userService;
 
-    public void saveToken(HhAuthTokenResponse token) {
-        User hr = userService.getCurrentUser();
-
-        HhToken entity = repo.findByHr(hr).orElse(
-                HhToken.builder().hr(hr).build()
-        );
-
-        entity.setAccessToken(token.getAccess_token());
-        entity.setRefreshToken(token.getRefresh_token());
-        entity.setExpiresAt(Instant.now().plusSeconds(token.getExpires_in()));
-
-        repo.save(entity);
-    }
 
     public void saveTokenForHr(Long hrId, HhAuthTokenResponse token) {
         User hr = userService.getById(hrId);

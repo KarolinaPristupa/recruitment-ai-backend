@@ -47,7 +47,7 @@ public class SecurityConfig {
 
                         // CORS preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
+                        .requestMatchers("/resumes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/hr/register").hasAuthority("ENT_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/auth/enterprise/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/enterprise/admin/register").permitAll()

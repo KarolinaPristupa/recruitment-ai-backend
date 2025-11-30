@@ -1,0 +1,16 @@
+package com.example.server.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/resumes/**")
+                .addResourceLocations("file:C:/Desktop/Учеба/7 СЕМ/recruitment-ai-app/server/src/main/resources/resumes/");
+    }
+
+}

@@ -9,6 +9,7 @@ import com.example.server.model.enums.ExperienceType;
 import com.example.server.model.enums.ScheduleType;
 import com.example.server.model.enums.VacancyStatus;
 import com.example.server.repository.VacancyRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class VacancyService {
     private final UserService userService;
     private final LogService logService;
     private final EnterpriseService enterpriseService;
-    private final HhAreaService hhAreaService;
+    private final HhVacancyService hhVacancyService;
 
     private void checkIsHR(User user) {
         if (!"HR".equals(user.getRole().getName())) {
@@ -31,7 +32,7 @@ public class VacancyService {
         }
     }
 
-    public VacancyResponseDTO createVacancy(VacancyRequestDTO dto) {
+    public VacancyResponseDTO createVacancy(VacancyRequestDTO dto) throws JsonProcessingException {
         User currentUser = userService.getCurrentUser();
         checkIsHR(currentUser);
 
@@ -60,10 +61,15 @@ public class VacancyService {
                 "Создана вакансия: " + vacancy.getTitle() + " (ID: " + vacancy.getId() + ") — " + vacancy.getStatus()
         );
 
+        if (VacancyStatus.ACTIVE.equals(dto.getStatus())) {
+            hhVacancyService.publish(vacancy.getId());
+            vacancy.setPublishedAt(LocalDateTime.now());
+        }
+
         return toResponse(vacancy);
     }
 
-    public VacancyResponseDTO updateVacancy(Long id, VacancyRequestDTO dto) {
+    public VacancyResponseDTO updateVacancy(Long id, VacancyRequestDTO dto) throws JsonProcessingException {
         User currentUser = userService.getCurrentUser();
         checkIsHR(currentUser);
 
@@ -88,6 +94,7 @@ public class VacancyService {
         vacancy.setUpdatedAt(LocalDateTime.now());
 
         if (VacancyStatus.ACTIVE.equals(dto.getStatus()) && vacancy.getPublishedAt() == null) {
+            hhVacancyService.publish(vacancy.getId());
             vacancy.setPublishedAt(LocalDateTime.now());
         }
 
@@ -127,6 +134,17 @@ public class VacancyService {
                 .map(this::toResponse)
                 .toList();
     }
+
+    public List<VacancyResponseDTO> getMyActiveVacancies() {
+        User currentUser = userService.getCurrentUser();
+        checkIsHR(currentUser);
+
+        return vacancyRepository.findByUserIdAndStatus(currentUser.getId(), VacancyStatus.ACTIVE)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
 
     public void deleteVacancy(Long id) {
         User currentUser = userService.getCurrentUser();
