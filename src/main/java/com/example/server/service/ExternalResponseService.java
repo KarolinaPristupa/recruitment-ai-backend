@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -35,12 +36,26 @@ public class ExternalResponseService {
                     token.getAccessToken()
             );
 
-            hhResponses.forEach(r -> r.setExternalVacancy(externalVacancy));
-            responseRepository.saveAll(hhResponses);
+            List<ExternalResponse> newResponses = hhResponses.stream()
+                    .filter(r -> !responseRepository.existsByExternalVacancyAndExternalResponseId(
+                            externalVacancy,
+                            r.getExternalResponseId()
+                    ))
+                    .peek(r -> {
+                        r.setExternalVacancy(externalVacancy);
+                        r.setDateReceived(LocalDateTime.now());
+                    })
+                    .toList();
 
-            logService.log(currentUser, ActionType.FETCH_RESPONSES,
-                    "Загружены отклики с HH для вакансии: " + externalVacancy.getVacancy().getTitle()
-                            + " (ID: " + externalVacancy.getId() + ")");
+            responseRepository.saveAll(newResponses);
+
+            logService.log(
+                    currentUser,
+                    ActionType.FETCH_RESPONSES,
+                    "Загружены отклики с HH для вакансии: " +
+                            externalVacancy.getVacancy().getTitle() +
+                            " (ID: " + externalVacancy.getId() + ")"
+            );
 
             return hhResponses;
 
@@ -48,18 +63,40 @@ public class ExternalResponseService {
             log.error("HH API вернул ошибку: {} BODY: {}", ex.getStatusCode(), ex.getResponseBodyAsString());
 
             List<ExternalResponse> mockResponses = mockResponseService.loadResponsesFromJson(externalVacancy);
-            mockResponses.forEach(r -> r.setExternalVacancy(externalVacancy));
-            responseRepository.saveAll(mockResponses);
 
-            logService.log(currentUser, ActionType.FETCH_RESPONSES,
-                    "Загружены отклики с мока для вакансии: " + externalVacancy.getVacancy().getTitle()
-                            + " (ID: " + externalVacancy.getId() + ")");
+            List<ExternalResponse> newMocks = mockResponses.stream()
+                    .filter(r -> !responseRepository.existsByExternalVacancyAndExternalResponseId(
+                            externalVacancy,
+                            r.getExternalResponseId()
+                    ))
+                    .peek(r -> {
+                        r.setExternalVacancy(externalVacancy);
+                        r.setDateReceived(LocalDateTime.now());
+                    })
+                    .toList();
+
+            responseRepository.saveAll(newMocks);
+
+            logService.log(
+                    currentUser,
+                    ActionType.FETCH_RESPONSES,
+                    "Загружены отклики с HH для вакансии: " +
+                            externalVacancy.getVacancy().getTitle() +
+                            " (ID: " + externalVacancy.getId() + ")"
+            );
 
             return mockResponses;
         }
     }
 
+
     public List<ExternalResponse> getByExternalVacancy(ExternalVacancy externalVacancy) {
         return responseRepository.findByExternalVacancy(externalVacancy);
     }
+
+    public ExternalResponse getById(Long id) {
+        return responseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Response not found"));
+    }
+
 }
