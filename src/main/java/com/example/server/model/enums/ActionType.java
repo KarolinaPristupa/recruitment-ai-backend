@@ -22,7 +22,7 @@ public enum ActionType {
     HH_LOGOUT,          // выход/отзыв токена HH
     HH_VACANCY_PUBLISHED, // вакансия была опубликована
     FETCH_RESPONSES, // Загружены отклики
-    ANALYZE_RESPONSE, // Проанализированы отклики
+    ANALYZE_RESPONSE, // проанализированы отклики
     OTHER               // любое действие, которое не входит в список
 }
 
