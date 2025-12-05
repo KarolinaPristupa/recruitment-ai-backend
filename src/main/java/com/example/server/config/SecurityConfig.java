@@ -53,9 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/user/login").permitAll()
 
                         .requestMatchers("/api/hh/oauth/callback").permitAll()
-
                         .requestMatchers("/mock-hh/**").permitAll()
-
                         .requestMatchers("/api/hh/oauth/check-token").authenticated()
                         .requestMatchers("/api/hh/oauth/login-url").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/vacancies/{id}/analytics/**").hasAuthority("HR")
