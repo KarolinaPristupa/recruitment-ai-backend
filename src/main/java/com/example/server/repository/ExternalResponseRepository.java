@@ -8,5 +8,10 @@ import java.util.List;
 
 public interface ExternalResponseRepository extends JpaRepository<ExternalResponse, Long> {
     List<ExternalResponse> findByExternalVacancy(ExternalVacancy externalVacancy);
+    boolean existsByExternalVacancyAndExternalResponseId(
+            ExternalVacancy vacancy,
+            String externalResponseId
+    );
+
 }
 

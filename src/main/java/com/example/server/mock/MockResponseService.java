@@ -36,6 +36,7 @@ public class MockResponseService {
                             .dateApplied(dto.getDateApplied())
                             .dateReceived(LocalDateTime.now())
                             .status(dto.getStatus())
+                            .externalResponseId(dto.getExternalResponseId())
                             .build()
                     ).toList();
 
