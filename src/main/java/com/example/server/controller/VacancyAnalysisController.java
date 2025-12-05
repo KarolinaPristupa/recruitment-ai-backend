@@ -1,14 +1,13 @@
 package com.example.server.controller;
 
+import com.example.server.dto.response.VacancyAnalyticsDTO;
 import com.example.server.model.ExternalResponse;
 import com.example.server.model.ExternalVacancy;
 import com.example.server.model.ResponseAnalysis;
 import com.example.server.model.User;
-import com.example.server.service.ExternalResponseService;
-import com.example.server.service.ExternalVacancyService;
-import com.example.server.service.ResumeAnalysisService;
-import com.example.server.service.UserService;
+import com.example.server.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +22,7 @@ public class VacancyAnalysisController {
     private final ExternalResponseService responseService;
     private final ResumeAnalysisService analysisService;
     private final UserService userService;
-
+    private final VacancyAnalyticsService analyticsService;
     @PostMapping("/{vacancyId}/analyze-responses")
     public ResponseEntity<?> analyzeAllResponses(@PathVariable Long vacancyId) {
         User currentUser = userService.getCurrentUser();
@@ -31,12 +30,12 @@ public class VacancyAnalysisController {
         List<ExternalResponse> responses = responseService.getByExternalVacancy(vacancy);
 
         if (responses.isEmpty()) {
-            return ResponseEntity.badRequest().body("No responses found for this vacancy");
+            return ResponseEntity.badRequest().body("На данную вакансию пока нет откликов");
         }
 
         analysisService.analyzeAll(vacancy, responses, currentUser);
 
-        return ResponseEntity.ok("AI analysis started for " + responses.size() + " responses");
+        return ResponseEntity.ok("Анализ запущен для  " + responses.size() + " откликов");
     }
 
     @GetMapping("/{vacancyId}/analysis/top")
@@ -48,4 +47,21 @@ public class VacancyAnalysisController {
         List<ResponseAnalysis> top = analysisService.getTopResults(vacancy, limit);
         return ResponseEntity.ok(top);
     }
+
+    @GetMapping("/{vacancyId}/analytics/all")
+    public ResponseEntity<VacancyAnalyticsDTO> getAllAnalytics(
+            @PathVariable Long vacancyId,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        VacancyAnalyticsDTO dto = new VacancyAnalyticsDTO(
+                analyticsService.getResponseDelay(vacancyId),
+                analyticsService.getTopSkills(vacancyId),
+                analyticsService.getSkillGap(vacancyId),
+                analyticsService.getStats(vacancyId),
+                analyticsService.getTopResumes(vacancyId, PageRequest.of(0, limit))
+        );
+
+        return ResponseEntity.ok(dto);
+    }
+
 }

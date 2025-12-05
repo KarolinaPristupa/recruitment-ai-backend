@@ -17,4 +17,5 @@ public interface ResponseAnalysisRepository extends JpaRepository<ResponseAnalys
         ORDER BY ra.matchPercent DESC
     """)
     List<ResponseAnalysis> findTopByVacancy(Long vacancyId, int limit);
+
 }
