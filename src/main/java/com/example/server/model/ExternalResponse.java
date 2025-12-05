@@ -24,11 +24,16 @@ public class ExternalResponse {
     @JoinColumn(name = "external_vacancy_id", nullable = false)
     private ExternalVacancy externalVacancy;
 
+    @Column(name = "external_response_id", nullable = false)
+    private String externalResponseId;
+
     private String resumeId;
     private String fileUrl;
     private String applicantName;
+
     @Column(columnDefinition = "TEXT")
     private String messageText;
+
     private LocalDateTime dateApplied;
     private LocalDateTime dateReceived;
     private String status;

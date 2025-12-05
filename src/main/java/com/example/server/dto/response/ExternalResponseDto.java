@@ -18,4 +18,5 @@ public class ExternalResponseDto {
     private LocalDateTime dateApplied;
 
     private String status;
+    private String externalResponseId;
 }
