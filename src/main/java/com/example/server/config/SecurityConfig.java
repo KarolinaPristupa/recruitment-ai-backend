@@ -45,7 +45,6 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // CORS preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/resumes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/hr/register").hasAuthority("ENT_ADMIN")
