@@ -57,7 +57,7 @@ public class ExternalResponseService {
                             " (ID: " + externalVacancy.getId() + ")"
             );
 
-            return hhResponses;
+            return responseRepository.findByExternalVacancy(externalVacancy);
 
         } catch (HttpClientErrorException ex) {
             log.error("HH API вернул ошибку: {} BODY: {}", ex.getStatusCode(), ex.getResponseBodyAsString());
@@ -85,7 +85,7 @@ public class ExternalResponseService {
                             " (ID: " + externalVacancy.getId() + ")"
             );
 
-            return mockResponses;
+            return responseRepository.findByExternalVacancy(externalVacancy);
         }
     }
 
