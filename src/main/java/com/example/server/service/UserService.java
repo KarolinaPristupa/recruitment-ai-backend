@@ -2,18 +2,21 @@ package com.example.server.service;
 
 import com.example.server.dto.request.EnterpriseWithAdminRegistrationDTO;
 import com.example.server.dto.request.UserRegistrationDTO;
+import com.example.server.dto.response.UserAccountResponseDTO;
 import com.example.server.model.Enterprise;
 import com.example.server.model.User;
 import com.example.server.model.enums.ActionType;
 import com.example.server.repository.EnterpriseRepository;
 import com.example.server.repository.RoleRepository;
 import com.example.server.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.server.util.JwtUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -24,15 +27,18 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final LogService logService;
 
+    private final JwtUtil jwtUtil;
+
     public UserService(UserRepository userRepository,
                        EnterpriseRepository enterpriseRepository, RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
-                       LogService logService) {
+                       LogService logService, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.enterpriseRepository = enterpriseRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.logService = logService;
+        this.jwtUtil = jwtUtil;
     }
 
     public User findByEmail(String email) {
@@ -130,5 +136,48 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("HR not found"));
     }
 
+    public UserAccountResponseDTO getUser() {
+        User user = getCurrentUser();
+        Enterprise enterprise = user.getEnterprise();
 
+        UserAccountResponseDTO dto = new UserAccountResponseDTO();
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+
+        if (enterprise != null) {
+            dto.setEnterpriseId(enterprise.getId());
+            dto.setEnterpriseName(enterprise.getName());
+            dto.setEnterpriseAddress(enterprise.getAddress());
+            dto.setEnterpriseContactEmail(enterprise.getContactEmail());
+            dto.setEnterpriseContactPhone(enterprise.getContactPhone());
+        }
+
+        return dto;
+    }
+
+    public Map<String, Object> updateUser(UserRegistrationDTO request) {
+        User user = getCurrentUser();
+
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        }
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+
+        userRepository.save(user);
+
+        logService.log(user, ActionType.UPDATE_HR, "Обновлен профиль HR: " + user.getEmail());
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().getName());
+
+        return Map.of(
+                "profile", getUser(),
+                "token", token
+        );
+    }
 }
