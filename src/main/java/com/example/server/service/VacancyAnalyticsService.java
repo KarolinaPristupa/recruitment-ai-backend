@@ -92,6 +92,7 @@ public class VacancyAnalyticsService {
                         ra.getExternalResponse().getApplicantName(),
                         ra.getScore(),
                         ra.getMatchPercent(),
+                        ra.getRatingR(),
                         ra.getExternalResponse().getFileUrl()
                 ))
                 .toList();

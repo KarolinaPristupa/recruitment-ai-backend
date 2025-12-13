@@ -12,5 +12,6 @@ public class TopResumeDTO {
     private String applicantName;
     private double score;
     private double matchCount;
+    private Double ratingR;
     private String fileUrl;
 }

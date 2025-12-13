@@ -27,6 +27,7 @@ public class ResponseAnalysis {
     private Double experienceYears;
     private String seniority;
     private Double matchPercent;
+    private Double ratingR;
     private LocalDateTime createdAt;
 
     @Column(columnDefinition = "TEXT")

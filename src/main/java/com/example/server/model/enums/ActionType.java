@@ -23,6 +23,11 @@ public enum ActionType {
     HH_VACANCY_PUBLISHED, // вакансия была опубликована
     FETCH_RESPONSES, // Загружены отклики
     ANALYZE_RESPONSE, // проанализированы отклики
+    VIEW_USERS, // Получены все пользователи
+    CREATE_EMPLOYEE, //Создан сотрудник
+    UPDATE_EMPLOYEE, // Отредаткирован сотрудник
+    DELETE_EMPLOYEE, //Удален сотрудник
+    VIEW_ENT_USERS, // Получены все пользователи с конкретного предприятия
     OTHER               // любое действие, которое не входит в список
 }
 

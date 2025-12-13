@@ -14,7 +14,7 @@ public interface ResponseAnalysisRepository extends JpaRepository<ResponseAnalys
     @Query("""
         SELECT ra FROM ResponseAnalysis ra 
         WHERE ra.externalResponse.externalVacancy.id = :vacancyId
-        ORDER BY ra.matchPercent DESC
+        ORDER BY ra.ratingR DESC
     """)
     List<ResponseAnalysis> findTopByVacancy(Long vacancyId, int limit);
 

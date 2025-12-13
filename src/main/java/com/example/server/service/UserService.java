@@ -16,7 +16,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -59,7 +61,7 @@ public class UserService {
         return savedUser;
     }
 
-    User createEnterpriseAdmin(EnterpriseWithAdminRegistrationDTO dto, Enterprise enterprise) {
+    public User createEnterpriseAdmin(EnterpriseWithAdminRegistrationDTO dto, Enterprise enterprise) {
         User admin = new User();
         admin.setFirstName(dto.getFirstName());
         admin.setLastName(dto.getLastName());
@@ -112,6 +114,80 @@ public class UserService {
 
         return user;
     }
+
+    public UserAccountResponseDTO createEmployeeForEnterprise(
+            UserRegistrationDTO dto,
+            User hrUser
+    ) {
+        Enterprise enterprise = hrUser.getEnterprise();
+        if (enterprise == null) {
+            throw new RuntimeException("HR не привязан к предприятию");
+        }
+
+        User employee = new User();
+        employee.setFirstName(dto.getFirstName());
+        employee.setLastName(dto.getLastName());
+        employee.setEmail(dto.getEmail());
+        employee.setPhone(dto.getPhone());
+        employee.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        employee.setEnterprise(enterprise);
+        employee.setRole(
+                roleRepository.findByName("EMPLOYEE")
+                        .orElseThrow(() -> new RuntimeException("Role EMPLOYEE not found"))
+        );
+
+        User saved = userRepository.save(employee);
+
+        logService.log(hrUser, ActionType.CREATE_EMPLOYEE,
+                "Создан сотрудник: " + saved.getEmail() +
+                        " (компания: " + enterprise.getName() + ")");
+
+        return toDto(saved);
+    }
+
+    public UserAccountResponseDTO updateEmployeeForEnterpriseByEmail(String email, UserRegistrationDTO dto, User hrUser) {
+        User employee = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        validateSameEnterprise(hrUser, employee);
+
+        employee.setFirstName(dto.getFirstName());
+        employee.setLastName(dto.getLastName());
+        employee.setPhone(dto.getPhone());
+
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            employee.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        userRepository.save(employee);
+
+        logService.log(hrUser, ActionType.UPDATE_EMPLOYEE,
+                "Обновлен сотрудник: " + employee.getEmail());
+
+        return toDto(employee);
+    }
+
+    public void deleteEmployeeForEnterpriseByEmail(String email, User hrUser) {
+        User employee = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        validateSameEnterprise(hrUser, employee);
+
+        userRepository.delete(employee);
+
+        logService.log(hrUser, ActionType.DELETE_EMPLOYEE,
+                "Удалён сотрудник: " + employee.getEmail());
+    }
+
+
+    private void validateSameEnterprise(User hrUser, User employee) {
+        if (hrUser.getEnterprise() == null ||
+                employee.getEnterprise() == null ||
+                !hrUser.getEnterprise().getId().equals(employee.getEnterprise().getId())) {
+            throw new RuntimeException("Нет доступа к этому сотруднику");
+        }
+    }
+
 
     public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -180,4 +256,43 @@ public class UserService {
                 "token", token
         );
     }
+
+    public List<UserAccountResponseDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+
+        logService.log(getCurrentUser(),
+                ActionType.VIEW_USERS,
+                "Получен список всех пользователей");
+
+        return users.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    public List<UserAccountResponseDTO> getUsersByEnterprise(Long enterpriseId) {
+        List<User> users = userRepository.findByEnterpriseId(enterpriseId);
+
+        logService.log(getCurrentUser(),
+                ActionType.VIEW_ENT_USERS,
+                "Получен список пользователей предприятия id=" + enterpriseId);
+
+        return users.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    public UserAccountResponseDTO toDto(User user) {
+        UserAccountResponseDTO dto = new UserAccountResponseDTO();
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+
+        if (user.getEnterprise() != null) {
+            dto.setEnterpriseId(user.getEnterprise().getId());
+            dto.setEnterpriseName(user.getEnterprise().getName());
+            dto.setEnterpriseAddress(user.getEnterprise().getAddress());
+            dto.setEnterpriseContactEmail(user.getEnterprise().getContactEmail());
+            dto.setEnterpriseContactPhone(user.getEnterprise().getContactPhone());
+        }
+
+        return dto;
+    }
+
 }

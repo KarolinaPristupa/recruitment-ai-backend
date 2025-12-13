@@ -102,7 +102,7 @@ public class ResumeAnalysisService {
         String seniority = "junior";
         double matchPercent = 0;
         List<String> skills = List.of();
-
+        double ratingR = 0;
         try {
             JsonNode root = objectMapper.readTree(cleanedJson);
             if (root.has("score")) score = root.get("score").asDouble(0);
@@ -115,6 +115,7 @@ public class ResumeAnalysisService {
                         objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
                 );
             }
+            ratingR = 0.5 * score + 0.3 * matchPercent + 0.2 * experienceYears;
         } catch (Exception e) {
             log.warn("Не удалось распарсить JSON от AI: {}", cleanedJson, e);
         }
@@ -135,6 +136,7 @@ public class ResumeAnalysisService {
                 .matchPercent(matchPercent)
                 .seniority(seniority)
                 .skillsJson(skillsJson)
+                .ratingR(ratingR)
                 .createdAt(LocalDateTime.now())
                 .build();
 
